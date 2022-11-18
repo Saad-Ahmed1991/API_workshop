@@ -1,23 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { Route, Routes } from "react-router-dom";
+import "./App.css";
+import Filter from "./filter/Filter";
+import RecipeDetails from "./RecipeDetails/RecipeDetails";
+import RecipeList from "./recipeList/RecipeList";
 
 function App() {
+  const [recipes, setRecipes] = useState([]);
+  const [query, setQuery] = useState("");
+  const fetchData = async () => {
+    try {
+      const res = await axios.get(
+        `https://api.edamam.com/api/recipes/v2?type=public&q=${query}&app_id=f5916273&app_key=5414e5c4db39d2938445151db71feb10&cuisineType=Mediterranean`
+      );
+      console.log("res", res);
+      setRecipes(res.data.hits);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, [query]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <Filter setQuery={setQuery} />
+              <RecipeList recipes={recipes} />
+            </>
+          }
+        />
+        <Route path="/details/:id" element={<RecipeDetails />} />
+      </Routes>
     </div>
   );
 }
